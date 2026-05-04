@@ -2,5 +2,10 @@
 __pycache__
 data/**
 confidential/env.py
+confidential/.key
 cache/ema/
+archive
+
 .DS_Store
+.env
+.credentials

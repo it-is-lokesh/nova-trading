@@ -3,3 +3,4 @@ streamlit
 streamlit-lightweight-charts
 tqdm
 pyotp
+cryptography

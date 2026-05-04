@@ -14,14 +14,13 @@ import sys
 import time
 from pathlib import Path
 
-# Add project root and angelone module to sys.path
+# Add project root to sys.path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
-sys.path.insert(0, str(PROJECT_ROOT / "download_data" / "angelone"))
 
 from tqdm import tqdm
 from core.utils import get_nifty200_symbols
-from fetch import get_data
+from core.download_data.angelone.fetch import get_data
 
 
 # ── Configuration ──────────────────────────────────────────────
@@ -72,6 +71,8 @@ def main():
     print("=" * 60)
 
     symbols = get_nifty200_symbols()
+    symbols = ['SYRMA']
+    print(symbols)
     total = len(symbols)
     print(f"\nDownloading {INTERVAL} data for {total} stocks...\n")
 

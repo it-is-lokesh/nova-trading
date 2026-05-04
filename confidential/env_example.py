@@ -1,30 +1,35 @@
-# Get API_KEY from AngelOne platform.
-API_KEY = "<API_KEY>"
+"""
+Example shape of the generated encrypted env file.
 
-# Get CLIENT CODE from AngelOne User ID.
-CLIENT_CODE = "<CLIENT_CODE>"
+Do not edit `confidential/env.py` by hand. Copy `.credentials.example` to
+`.credentials`, fill plaintext values there, then run:
 
-# Get CLIENT PIN from AngelOne User PIN used for login.
-CLIENT_PIN = "<CLIENT_PIN>"
+    python applications/security.py
 
-# Get TOTP_CODE from AngelOne TOTP code from any of the authenticator apps. 
-# Go to https://smartapi.angelbroking.com/enable-totp to enable 2FA.
-TOTP_CODE = "<TOTP_CODE>"
+The generated `confidential/env.py` stores encrypted Fernet tokens like the
+constants below. Runtime code decrypts them using `confidential/.key`.
+"""
 
-# Get TOTP_SECRET from AngelOne platform (shown when you enable TOTP).
-# This is used to automatically generate TOTP codes.
-TOTP_SECRET = "<TOTP_SECRET>"
+API_KEY = "gAAAA..."
+CLIENT_CODE = "gAAAA..."
+CLIENT_PIN = "gAAAA..."
+TOTP_CODE = "gAAAA..."
+TOTP_SECRET = "gAAAA..."
+STATE_VARIABLE = "gAAAA..."
+JWT_TOKEN = "gAAAA..."
+CLIENT_LOCAL_IP = "gAAAA..."
+CLIENT_PUBLIC_IP = "gAAAA..."
+MAC_ADDRESS = "gAAAA..."
 
-STATE_VARIABLE = "get_authorization"
-
-# Get JWT_TOKEN by running the ./download_data/angelone/get_authorization.py script.
-JWT_TOKEN = "<JWT_TOKEN>"
-
-# Get CLIENT_LOCAL_IP using "ifconfig" command on your local network.
-CLIENT_LOCAL_IP = "<CLIENT_LOCAL_IP>"
-
-# Get CLIENT_PUBLIC_IP using the command "curl -4 ifconfig.me" in terminal.
-CLIENT_PUBLIC_IP = "<CLIENT_PUBLIC_IP>"
-
-# Get MAC_ADDRESS using ifconfig command.
-MAC_ADDRESS = "<MAC_ADDRESS>"
+__all__ = [
+    "API_KEY",
+    "CLIENT_CODE",
+    "CLIENT_PIN",
+    "TOTP_CODE",
+    "TOTP_SECRET",
+    "STATE_VARIABLE",
+    "JWT_TOKEN",
+    "CLIENT_LOCAL_IP",
+    "CLIENT_PUBLIC_IP",
+    "MAC_ADDRESS",
+]
