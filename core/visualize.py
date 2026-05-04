@@ -1,7 +1,6 @@
 import os
 import io
 from tqdm import tqdm
-import yfinance as yf
 import pandas as pd
 import streamlit as st
 from streamlit_lightweight_charts import renderLightweightCharts
@@ -66,7 +65,6 @@ class Process:
 
     def update_ssl_hybrid(self):
         self.ssl_df: pd.DataFrame = ssl_hybrid_core(self.data)
-        self.ssl_df.to_csv('hindistan unilever.csv')
 
     def update_qqe_mod(self):
         self.qqe_df = qqe_mod_core(self.data)
