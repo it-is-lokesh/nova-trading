@@ -26,7 +26,7 @@ from fetch import get_data
 
 # ── Configuration ──────────────────────────────────────────────
 EXCHANGE = "NSE"
-INTERVAL = "ONE_MINUTE"
+INTERVAL = "FIFTEEN_MINUTE"
 FROM_DATE = "2016-04-01 09:15"
 TO_DATE = "2026-04-24 15:30"
 

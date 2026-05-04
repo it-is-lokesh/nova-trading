@@ -4,7 +4,7 @@ from tqdm import tqdm
 import pandas as pd
 import streamlit as st
 from streamlit_lightweight_charts import renderLightweightCharts
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import numpy as np
 import sys
 import os
@@ -39,15 +39,27 @@ class Process:
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         df = pd.read_csv(os.path.join(base_dir, "cache", "min15", f"{self.symbol}.csv"), parse_dates=True)
         df['datetime'] = pd.to_datetime(df['datetime'])
+        df.sort_values("datetime", inplace=True)
 
-        # convert to unix seconds
-        df['time'] = (df['datetime'].astype('int64') // 10**9).astype(int)
+        interval_counts = df["datetime"].diff().dropna().value_counts()
+        if not interval_counts.empty and interval_counts.index[0] != pd.Timedelta(minutes=15):
+            st.warning(
+                f"{self.symbol} cache is not 15-minute data. "
+                f"Most common interval: {interval_counts.index[0]}."
+            )
+
+        # Lightweight Charts formats intraday timestamps as UTC, so encode the
+        # NSE wall-clock time as UTC to keep labels in IST market time.
+        chart_datetimes = df["datetime"].dt.tz_localize(None).dt.tz_localize("UTC")
+        df['time'] = chart_datetimes.map(lambda value: int(value.timestamp()))
 
         # drop duplicate times to avoid lightweight-charts rendering failure
         df.drop_duplicates(subset=['time'], keep='last', inplace=True)
 
         self.data = df
         self.x_dates = df['time'].tolist()
+        first_chart_label = datetime.fromtimestamp(self.x_dates[0], tz=timezone.utc).strftime("%Y-%m-%d %H:%M")
+        st.caption(f"{self.symbol} first candle: {df['datetime'].iloc[0]} | chart time: {first_chart_label}")
     
     def update_ema(self):
         self.data['ema_9'] = ema(self.data['close'], 9)
@@ -101,10 +113,22 @@ class Process:
             if pd.notna(o) and pd.notna(h) and pd.notna(l) and pd.notna(c)
         ]
 
+        axis_options = {
+            "rightPriceScale": {
+                "borderVisible": True,
+                "borderColor": "#9ca3af",
+            },
+            "timeScale": {
+                "timeVisible": True,
+                "secondsVisible": False,
+                "borderVisible": True,
+                "borderColor": "#9ca3af",
+            },
+        }
+
         # Chart configuration
         chart_options = {
             "height": 500,
-            "width": 1500,
             "layout": {
                 "background": {"color": "#ffffff"},
                 "textColor": "#333",
@@ -115,11 +139,11 @@ class Process:
             },
             "crosshair": {"mode": 0},
             "timeScale": {
-                "timeVisible": True, 
-                "secondsVisible": False,
+                **axis_options["timeScale"],
                 "rightOffset": 0,  # align last candle to right
                 "barSpacing": 30,   # adjust zoom
             },
+            "rightPriceScale": axis_options["rightPriceScale"],
         }
 
         print(self.data.columns)
@@ -173,7 +197,6 @@ class Process:
 
         chart_options_qqe_mod = {
             "height": 200,
-            "width": 1500,
             "layout": {
                 "background": {"color": "#ffffff"},
                 "textColor": "#333",
@@ -183,7 +206,8 @@ class Process:
                 "horzLines": {"color": "#eee"},
             },
             "crosshair": {"mode": 0},
-            "timeScale": {"timeVisible": True, "secondsVisible": False},
+            "timeScale": axis_options["timeScale"],
+            "rightPriceScale": axis_options["rightPriceScale"],
         }
 
         hist_series_up = self.get_series(self.qqe_df['qqe_up_signal'], color="green")
@@ -200,6 +224,5 @@ class Process:
         # st.write("Candles sample:", candles[:5])
         # st.write("Total candles:", len(candles))
 
-        renderLightweightCharts([{"chart": chart_options, "series": series}, {"chart": chart_options_qqe_mod, "series": series_qqe_mod}], key="chart")
-
-
+        chart_key = f"chart-{self.symbol}-{self.x_dates[0]}-{self.x_dates[-1]}-{len(self.x_dates)}"
+        renderLightweightCharts([{"chart": chart_options, "series": series}, {"chart": chart_options_qqe_mod, "series": series_qqe_mod}], key=chart_key)
