@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+from streamlit_lightweight_charts import renderLightweightCharts
 import sys
 import os
 
@@ -7,7 +8,8 @@ base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if base_dir not in sys.path:
     sys.path.insert(0, base_dir)
 
-from core.visualize import Process
+from core.algorithms.ssl_hybrid.visualize import SSLHybridVisualizer
+from core.algorithms.qqe_mod.visualize import QQEModVisualizer
 
 
 def main():
@@ -32,12 +34,20 @@ def main():
     # start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2025-08-01"))
     # end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2025-09-28"))
 
-    obj = Process(symbol)
-    obj.update_data()
-    obj.update_ema()
-    obj.update_ssl_hybrid()
-    obj.update_qqe_mod()
-    obj.visualize()
+    # --- SSL Hybrid (overlay on candlestick chart) ---
+    ssl_viz = SSLHybridVisualizer(symbol)
+    ssl_viz.update_data()
+    ssl_viz.compute()
+
+    # --- QQE Mod (separate panel below) ---
+    qqe_viz = QQEModVisualizer(symbol)
+    qqe_viz.update_data(show_caption=False)
+    qqe_viz.compute()
+
+    # Compose both charts: SSL overlay first, QQE panel below
+    all_charts = ssl_viz.get_chart_data() + qqe_viz.get_chart_data()
+    chart_key = f"chart-{symbol}-{ssl_viz.x_dates[0]}-{ssl_viz.x_dates[-1]}-{len(ssl_viz.x_dates)}"
+    renderLightweightCharts(all_charts, key=chart_key)
 
 if __name__ == "__main__":
     main()
