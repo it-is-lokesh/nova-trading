@@ -1,6 +1,7 @@
 .vscode
 __pycache__
 data/**
+data_base/*.db
 confidential/env.py
 confidential/.key
 cache/ema/
